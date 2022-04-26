@@ -22,7 +22,10 @@ function Messages() {
     <div className='w-full '>
       {data.map((message)=>(
         <Message key={message.id} message={message}/>
-      ))}
+      ))};
+    
+      
+      
         </div>
    
     </div>

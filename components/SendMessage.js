@@ -1,4 +1,3 @@
-import React, {useState} from 'react'
 import { MdStarOutline }  from 'react-icons/md'
 import { BiUserCircle }  from 'react-icons/bi'
 import { BsImageFill }  from 'react-icons/bs'
@@ -7,7 +6,20 @@ import { BsEmojiSmile }  from 'react-icons/bs'
 import { GrLocation }  from 'react-icons/gr'
 import { useMoralis } from 'react-moralis'
 
+import React, {useState,useEffect} from 'react'
+import {
+    ref,
+    uploadBytes,
+    getDownloadURL,
+    listAll,
+    list,
+  } from "firebase/storage";
+  import { storage } from "../components/firebase";
+  import { v4 } from "uuid";
+
 function SendMessage() {
+  const [imageuplad, setImageuplad] = useState(null)
+  const [imageurl,setImageurl] = useState([])
   const {user,Moralis} = useMoralis();
   const [message, setMessage] = useState("");
   const sendMessage = (e) =>{
@@ -28,6 +40,29 @@ if(!message) return;
     })
     setMessage("")
   }
+  
+  const imagelisRef = ref(storage,'image2/');
+  
+  const uploadFile = () => {
+      if(imageuplad == null) return;
+      const imageRef = ref(storage,`image2/${imageuplad.name + v4()}`);
+      uploadBytes(imageRef, imageuplad).then((snapshot) => {
+          getDownloadURL(snapshot.ref).then((url)=>{
+              setImageurl((prev)=>[...prev, url]);
+          });
+      });
+  };
+  
+  useEffect(()=>{
+      listAll(imagelisRef).then((response)=>{
+          response.items.forEach((item)=>{
+              getDownloadURL(item).then((url)=>{
+                  setImageurl((prev)=>[...prev,url]);
+              });
+          });
+  
+      });
+  },[]);
   return (
     <div className='w-full items-center justify-center  '>
       <div className='flex justify-between my-1'>
@@ -45,7 +80,18 @@ if(!message) return;
       </div>
       <div className='flex justify-between items-center'>
         <div className="flex px-6">
-<h1><BsImageFill className='text-blue-400 '/><span className="px-4"></span></h1>
+<h1>
+<input type='file' onChange={(event)=>{
+setImageuplad(event.target.files[0]);
+        }}/>
+        <button onClick={uploadFile}>Uplad files
+  <BsImageFill className='text-blue-400 '/><span className="px-4"></span></button>
+  
+        {imageurl.map((url) => {
+        return <img src={url} className='w-56 h-30'/>
+})}
+        
+        </h1>
 <h1><AiOutlineFileGif className='text-blue-400'/><span className="px-4"></span></h1>
 <h1><BsEmojiSmile className='text-blue-400'/><span className="px-4"></span></h1>
 <h1><GrLocation className='text-blue-400'/></h1>
@@ -53,9 +99,10 @@ if(!message) return;
 <button className='text-2xl text-white shadow-xl font-medium cursor-pointer hover:opacity-90 bg-[#15a2fa] justify-center items-center rounded-full px-4 py-[5px] p-4 ' type='submit' onClick={sendMessage}>Tweet</button>
 
         </div>
+       
         <hr className='border-b-[1px] mt-4'/>
     </div>
-  )
+  ) 
 }
 
 export default SendMessage

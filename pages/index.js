@@ -5,6 +5,8 @@ import Widgets from '../components/Widgets'
 import { useMoralis } from 'react-moralis'
 import Login from '../components/Login'
 import Messages from '../components/Messages';
+
+
 const Home =() => {
   const { isAuthenticated,logout} = useMoralis();
 
@@ -15,11 +17,12 @@ if(!isAuthenticated) return <Login/>
         <title>Twitter</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-<div className='flex flex-row justify-evenly'>
+<div className='flex flex-row '>
       <Sidebar/>
       
       <Messages/>
       <Widgets/>
+      
       </div>
       
     </div>
